@@ -13,19 +13,41 @@ use Type::Tiny;
 use Exporter::Shiny qw( sah2type );
 
 sub sah2type {
-	my ( $schema, %opts ) = @_;
+	state $pl = 'Data::Sah'->new->get_compiler("perl");
 	
-	my $coderef = gen_validator( $schema );
-	my $source  = gen_validator( $schema, { source => 1 } );
+	my ( $schema, %opts ) = @_;
 	
 	return 'Type::Tiny'->new(
 		_data_sah  => $schema,
-		constraint => sub { @_ = $_; goto $coderef },
+		constraint => sub {
+			state $coderef = gen_validator( $schema );
+			@_ = $_;
+			goto $coderef
+		},
 		inlined    => sub {
 			my $varname = pop;
-			( my $src = $source )
-				=~ s/sub \{/local \@_ = ($varname); eval \{/;
-			$src;
+			use Data::Dumper;
+			if ( $varname =~ /\A\$([^\W0-9]\w*)\z/ ) {
+				my $cd = $pl->compile( schema => $schema, data_name => "$1" );
+				my $code = $cd->{result};
+				return $code if ! @{ $cd->{modules} };
+				my $modules = join '', map {
+					$_->{use_statement}
+						? sprintf( '%s; ', $_->{use_statement} )
+						: sprintf( 'require %s; ', $_->{name} )
+				} @{ $cd->{modules} };
+				return "do { $modules $code }";
+			}
+			else {
+				my $cd = $pl->compile( schema => $schema );
+				my $code = $cd->{result};
+				my $modules = join '', map {
+					$_->{use_statement}
+						? sprintf( '%s; ', $_->{use_statement} )
+						: sprintf( 'require %s; ', $_->{name} )
+				} @{ $cd->{modules} };
+				return "do { my \$data = $varname; $modules $code }";
+			}
 		},
 		constraint_generator => sub {
 			my @params = @_;
