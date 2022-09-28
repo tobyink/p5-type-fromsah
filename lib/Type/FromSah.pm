@@ -5,7 +5,7 @@ use warnings;
 package Type::FromSah;
 
 our $AUTHORITY = 'cpan:TOBYINK';
-our $VERSION   = '0.001';
+our $VERSION   = '0.002';
 
 use Data::Sah qw( gen_validator );
 use Type::Tiny;

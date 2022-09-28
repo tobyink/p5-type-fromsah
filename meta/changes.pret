@@ -4,3 +4,8 @@
 	issued  2022-09-28;
 	label   "Initial release".
 
+`Type-FromSah 0.002 cpan:TOBYINK`
+	issued  2022-09-29;
+	changeset [
+		item "Improvements to inlining."^^Change;
+	].
