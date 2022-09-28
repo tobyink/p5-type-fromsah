@@ -1,0 +1,13 @@
+# This file provides instructions for packaging.
+
+@prefix : <http://ontologi.es/doap-deps#>.
+
+`Type-FromSah`
+	:runtime-requirement    [ :on "perl 5.010001"^^:CpanId ];
+	:runtime-requirement    [ :on "Type::Tiny 2.000000"^^:CpanId ];
+	:runtime-requirement    [ :on "Data::Sah"^^:CpanId ];
+	:runtime-requirement    [ :on "Exporter::Shiny"^^:CpanId ];
+	:test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
+	:develop-recommendation [ :on "Dist::Inkt 0.001"^^:CpanId ];
+	.
+
