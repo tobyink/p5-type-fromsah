@@ -7,7 +7,7 @@ package Type::FromSah;
 our $AUTHORITY = 'cpan:TOBYINK';
 our $VERSION   = '0.002';
 
-use Data::Sah qw( gen_validator );
+use Data::Sah qw( gen_validator normalize_schema );
 use Type::Tiny;
 
 use Exporter::Shiny qw( sah2type );
@@ -16,6 +16,7 @@ sub sah2type {
 	state $pl = 'Data::Sah'->new->get_compiler("perl");
 	
 	my ( $schema, %opts ) = @_;
+	$schema = normalize_schema( $schema );
 	
 	return 'Type::Tiny'->new(
 		_data_sah  => $schema,
@@ -51,7 +52,7 @@ sub sah2type {
 		},
 		constraint_generator => sub {
 			my @params = @_;
-			my $new_schema = [ @$schema, @params ];
+			my $new_schema = [ $schema->[0], { %{ $schema->[1] }, @params } ];
 			my $child = sah2type( $new_schema, parameters => \@params );
 			$child->check(undef); # force type checks to compile BEFORE parent
 			$child->{parent} = $Type::Tiny::parameterize_type;
