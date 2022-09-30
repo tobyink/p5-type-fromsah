@@ -23,15 +23,14 @@ sub sah2type {
 		_data_sah  => $schema,
 		parent     => ( $schema->[1]{req} ? Item : Optional[Item] ),
 		constraint => sub {
-			state $coderef = gen_validator( $schema );
+			state $coderef = gen_validator( $schema, coerce => 0 );
 			@_ = $_;
 			goto $coderef
 		},
 		inlined    => sub {
 			my $varname = pop;
-			use Data::Dumper;
 			if ( $varname =~ /\A\$([^\W0-9]\w*)\z/ ) {
-				my $cd = $pl->compile( schema => $schema, data_name => "$1" );
+				my $cd = $pl->compile( schema => $schema, coerce => 0, data_name => "$1" );
 				my $code = $cd->{result};
 				return $code if ! @{ $cd->{modules} };
 				my $modules = join '', map {
@@ -42,7 +41,7 @@ sub sah2type {
 				return "do { $modules $code }";
 			}
 			else {
-				my $cd = $pl->compile( schema => $schema );
+				my $cd = $pl->compile( schema => $schema, coerce => 0 );
 				my $code = $cd->{result};
 				my $modules = join '', map {
 					$_->{use_statement}
@@ -63,6 +62,17 @@ sub sah2type {
 		( exists($schema->[1]{default})
 			? ( type_default => sub { $schema->[1]{default} } )
 			: () ),
+		_build_coercion => sub {
+			my $coercion = shift;
+			my $f = gen_validator( $schema, { return_type => 'bool_valid+val' } );
+			$coercion->add_type_coercions(
+				Item() => sub {
+					my ( undef, $new ) = @{ $f->($_) };
+					return $new;
+				},
+			);
+			$coercion->freeze;
+		},
 		%opts,
 	);
 }
