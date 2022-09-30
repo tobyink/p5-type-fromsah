@@ -29,27 +29,25 @@ sub sah2type {
 		},
 		inlined    => sub {
 			my $varname = pop;
+			my $cd;
+			my $handle_varname = '';
+			
 			if ( $varname =~ /\A\$([^\W0-9]\w*)\z/ ) {
-				my $cd = $pl->compile( schema => $schema, coerce => 0, data_name => "$1" );
-				my $code = $cd->{result};
-				return $code if ! @{ $cd->{modules} };
-				my $modules = join '', map {
-					$_->{use_statement}
-						? sprintf( '%s; ', $_->{use_statement} )
-						: sprintf( 'require %s; ', $_->{name} )
-				} @{ $cd->{modules} };
-				return "do { $modules $code }";
+				$cd = $pl->compile( schema => $schema, coerce => 0, data_name => "$1" );
 			}
 			else {
-				my $cd = $pl->compile( schema => $schema, coerce => 0 );
-				my $code = $cd->{result};
-				my $modules = join '', map {
-					$_->{use_statement}
-						? sprintf( '%s; ', $_->{use_statement} )
-						: sprintf( 'require %s; ', $_->{name} )
-				} @{ $cd->{modules} };
-				return "do { my \$data = $varname; $modules $code }";
+				$cd = $pl->compile( schema => $schema, coerce => 0, data_name => 'data' );
+				$handle_varname = "my \$data = $varname;";
 			}
+			
+			my $code = $cd->{result};
+			my $load_modules = join '', map {
+				$_->{use_statement}
+					? sprintf( '%s; ', $_->{use_statement} )
+					: sprintf( 'require %s; ', $_->{name} )
+			} @{ $cd->{modules} };
+			
+			return "do { $handle_varname $load_modules $code }";
 		},
 		constraint_generator => sub {
 			my @params = @_;
