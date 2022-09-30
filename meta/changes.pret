@@ -9,3 +9,12 @@
 	changeset [
 		item "Improvements to inlining."^^Change;
 	].
+
+`Type-FromSah 0.003 cpan:TOBYINK`
+	issued  2022-09-30;
+	changeset [
+		item "Further improvements to inlining."^^Change;
+		item "Handle coercions properly."^^Change;
+		item "Set a type_default for types where the Sah schema had a default."^^Change;
+		item "Type objects returned by sah2type will how have a parent of either Item or Optional[Item]."^^Change;
+	].
