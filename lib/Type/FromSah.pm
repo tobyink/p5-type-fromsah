@@ -9,6 +9,7 @@ our $VERSION   = '0.002';
 
 use Data::Sah qw( gen_validator normalize_schema );
 use Type::Tiny;
+use Types::Standard qw( Item Optional );
 
 use Exporter::Shiny qw( sah2type );
 
@@ -20,6 +21,7 @@ sub sah2type {
 	
 	return 'Type::Tiny'->new(
 		_data_sah  => $schema,
+		parent     => ( $schema->[1]{req} ? Item : Optional[Item] ),
 		constraint => sub {
 			state $coderef = gen_validator( $schema );
 			@_ = $_;
