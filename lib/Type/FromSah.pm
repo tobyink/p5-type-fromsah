@@ -41,11 +41,8 @@ sub sah2type {
 			}
 			
 			my $code = $cd->{result};
-			my $load_modules = join '', map {
-				$_->{use_statement}
-					? sprintf( '%s; ', $_->{use_statement} )
-					: sprintf( 'require %s; ', $_->{name} )
-			} @{ $cd->{modules} };
+			my $load_modules = join '',
+				map $pl->stmt_require_module($_), @{ $cd->{modules} };
 			
 			return "do { $handle_varname $load_modules $code }";
 		},
