@@ -24,3 +24,9 @@
 	changeset [
 		item "Add missing testing dependency on Test::Requires."^^Packaging;
 	].
+
+`Type-FromSah 0.005 cpan:TOBYINK`
+	issued  2022-09-30;
+	changeset [
+		item "Skip 05coercion.t test if DateTime.pm is not available."^^Tests;
+	].
