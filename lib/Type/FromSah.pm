@@ -58,6 +58,9 @@ sub sah2type {
 			$child->{parent} = $Type::Tiny::parameterize_type;
 			return $child;
 		},
+		( exists($schema->[1]{default})
+			? ( type_default => sub { $schema->[1]{default} } )
+			: () ),
 		%opts,
 	);
 }
