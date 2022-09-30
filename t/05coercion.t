@@ -23,6 +23,7 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Requires 'Data::Sah::Coerce';
+use Test::Requires 'DateTime';
 
 use Type::FromSah -all;
 
